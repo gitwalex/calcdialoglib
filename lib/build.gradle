@@ -1,8 +1,6 @@
 plugins {
     id "com.android.library"
-    id "com.github.dcendents.android-maven"
-    id "com.jfrog.bintray"
-    id "com.github.breadmoirai.github-release"
+    id 'maven-publish'
 }
 
 ext {
@@ -20,6 +18,17 @@ android {
         versionCode libVersionCode
         versionName libVersion
     }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+        // Compile für unchecked und deprecation
+        tasks.withType(JavaCompile) {
+            options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+        }
+
+    }
+
+
 }
 
 dependencies {
@@ -30,6 +39,18 @@ dependencies {
     testImplementation "junit:junit:$junitVersion"
 }
 
-tasks.withType(Javadoc).all { enabled = false }
+afterEvaluate {
+    publishing {
+        publications {
+            // Creates a Maven publication called "release".
+            release(MavenPublication) {
+                // Applies the component for the release build variant.
+                from components.release
+            }
+        }
+    }
 
-apply from: "publishing.gradle"
+    tasks.withType(Javadoc).all { enabled = false }
+
+
+}
